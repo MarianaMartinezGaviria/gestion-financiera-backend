@@ -10,12 +10,12 @@ import com.ebp08.gestion_financiera_backend.enums.TipoTransaccion;
 import com.ebp08.gestion_financiera_backend.repository.CategoriaRepository;
 import com.ebp08.gestion_financiera_backend.repository.TransaccionProgramadaRepository;
 import com.ebp08.gestion_financiera_backend.security.SecurityHelper;
+import com.ebp08.gestion_financiera_backend.util.MoneyParser;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -46,20 +46,7 @@ public class TransaccionProgramadaService {
         }
 
         // Validar y convertir monto — mismo patrón que TransaccionService
-        if (request.getMonto() == null || request.getMonto().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto es obligatorio.");
-        }
-
-        BigDecimal monto;
-        try {
-            monto = new BigDecimal(request.getMonto().trim());
-        } catch (NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto debe tener un formato numérico válido.");
-        }
-
-        if (monto.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto debe ser mayor a cero.");
-        }
+        java.math.BigDecimal monto = MoneyParser.parse(request.getMonto());
 
         // Validar fechaFin si se envía
         if (request.getFechaFin() != null && request.getFechaFin().isBefore(request.getFechaInicio())) {
@@ -109,15 +96,7 @@ public class TransaccionProgramadaService {
                         "Transacción programada no encontrada o no te pertenece."));
 
         if (request.getMonto() != null && !request.getMonto().trim().isEmpty()) {
-            BigDecimal monto;
-            try {
-                monto = new BigDecimal(request.getMonto().trim());
-            } catch (NumberFormatException e) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto debe tener un formato numérico válido.");
-            }
-            if (monto.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El monto debe ser mayor a cero.");
-            }
+            java.math.BigDecimal monto = MoneyParser.parse(request.getMonto());
             programada.setMonto(monto);
         }
 

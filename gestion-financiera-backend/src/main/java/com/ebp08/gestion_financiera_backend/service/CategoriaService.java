@@ -91,7 +91,9 @@ public class CategoriaService {
     }
 
     private Categoria obtenerCategoriaPorDefecto() {
-        return categoriaRepository.findByNombreIgnoreCaseAndUsuarioIsNull("OTROS")
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "No existe la categoría global OTROS."));
+        return categoriaRepository.findByNombreIgnoreCaseAndUsuarioIsNull(com.ebp08.gestion_financiera_backend.util.AppConstants.DEFAULT_CATEGORY_NAME)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    String.format(com.ebp08.gestion_financiera_backend.util.AppConstants.DEFAULT_CATEGORY_NOT_FOUND,
+                            com.ebp08.gestion_financiera_backend.util.AppConstants.DEFAULT_CATEGORY_NAME)));
     }
 }
