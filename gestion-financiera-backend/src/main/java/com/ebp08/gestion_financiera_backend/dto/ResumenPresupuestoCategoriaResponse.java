@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResumenPresupuestoCategoriaResponse {
 
+    private Long idPresupuesto;
     private Long idCategoria;
     private String nombreCategoria;
     private BigDecimal montoLimite;
@@ -20,8 +21,8 @@ public class ResumenPresupuestoCategoriaResponse {
     private BigDecimal porcentajeUso;
     private LocalDateTime fechaLimite;
 
-    public static ResumenPresupuestoCategoriaResponse de(Long idCategoria, String nombreCategoria, BigDecimal montoLimite, 
+    public static ResumenPresupuestoCategoriaResponse de(Long idPresupuesto, Long idCategoria, String nombreCategoria, BigDecimal montoLimite, 
             BigDecimal gastado, BigDecimal disponible, BigDecimal porcentajeUso, LocalDateTime fechaLimite) {
-        return new ResumenPresupuestoCategoriaResponse(idCategoria, nombreCategoria, montoLimite, gastado, disponible, porcentajeUso, fechaLimite);
+        return new ResumenPresupuestoCategoriaResponse(idPresupuesto, idCategoria, nombreCategoria, montoLimite, gastado, disponible, porcentajeUso, fechaLimite);
     }
 }

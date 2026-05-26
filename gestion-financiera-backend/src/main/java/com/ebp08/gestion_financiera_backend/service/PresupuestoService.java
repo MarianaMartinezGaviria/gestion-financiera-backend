@@ -134,7 +134,8 @@ public class PresupuestoService {
             gastado,
             disponible,
             porcentajeUso,
-            presupuesto.getFechaLimite()
+            presupuesto.getFechaLimite(),
+            presupuesto.getId()
         );
     }
 
@@ -167,6 +168,7 @@ public class PresupuestoService {
         BigDecimal porcentajeUso = calcularPorcentajeUso(presupuesto.getMontoLimite(), gastado);
 
         return ResumenPresupuestoCategoriaResponse.de(
+            presupuesto.getId(),
             categoria.getId(),
             categoria.getNombre(),
             presupuesto.getMontoLimite(),
@@ -207,6 +209,13 @@ public class PresupuestoService {
 
         return gastado.multiply(BigDecimal.valueOf(100))
             .divide(montoLimite, 2, RoundingMode.HALF_UP);
+    }
+
+    public Optional<Presupuesto> obtenerPresupuestoPorId(Long idPresupuesto) {
+        Long idUsuario = securityHelper.obtenerUsuarioAutenticado().getId();
+        securityHelper.validarPropiedad(idUsuario);
+
+        return presupuestoRepository.findByIdAndUsuarioId(idPresupuesto, idUsuario);
     }
 
 }

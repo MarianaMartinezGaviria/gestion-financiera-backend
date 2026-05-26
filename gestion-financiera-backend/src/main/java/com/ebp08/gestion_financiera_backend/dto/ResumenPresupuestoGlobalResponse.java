@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class ResumenPresupuestoGlobalResponse {
 
     private boolean presupuestoDefinido;
+    private Long idPresupuesto;
     private BigDecimal montoLimite;
     private BigDecimal gastado;
     private BigDecimal disponible;
@@ -27,7 +28,9 @@ public class ResumenPresupuestoGlobalResponse {
         return response;
     }
 
-    public static ResumenPresupuestoGlobalResponse conPresupuesto(BigDecimal montoLimite, BigDecimal gastado, BigDecimal disponible, BigDecimal porcentajeUso, LocalDateTime fechaLimite) {
+    public static ResumenPresupuestoGlobalResponse conPresupuesto(BigDecimal montoLimite, BigDecimal gastado, 
+                                                                    BigDecimal disponible, BigDecimal porcentajeUso, 
+                                                                    LocalDateTime fechaLimite, Long idPresupuesto) {
         ResumenPresupuestoGlobalResponse response = new ResumenPresupuestoGlobalResponse();
         response.setPresupuestoDefinido(true);
         response.setMontoLimite(montoLimite);
@@ -35,6 +38,7 @@ public class ResumenPresupuestoGlobalResponse {
         response.setDisponible(disponible);
         response.setPorcentajeUso(porcentajeUso);
         response.setFechaLimite(fechaLimite);
+        response.setIdPresupuesto(idPresupuesto);
         return response;
     }
 }

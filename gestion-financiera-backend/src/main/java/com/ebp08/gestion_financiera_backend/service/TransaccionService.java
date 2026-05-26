@@ -1,6 +1,5 @@
 package com.ebp08.gestion_financiera_backend.service; // Indica que esta clase pertenece al paquete service, donde va la lógica de negocio.
 
-import java.math.BigDecimal; // Importa BigDecimal para manejar valores monetarios con precisión y evitar errores de decimales.
 import java.time.LocalDateTime; // Importa LocalDateTime para guardar la fecha y hora en la que se crea la transacción.
 import java.util.List; // Importa List porque más abajo tenemos un método que devuelve una lista de transacciones.
 
