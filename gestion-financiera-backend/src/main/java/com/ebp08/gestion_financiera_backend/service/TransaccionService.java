@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus; // Importa los códigos de estado HT
 import org.springframework.stereotype.Service; // Importa la anotación @Service para marcar esta clase como un servicio de Spring.
 import org.springframework.web.server.ResponseStatusException; // Importa la excepción que permite devolver errores HTTP con mensaje personalizado.
 
+import com.ebp08.gestion_financiera_backend.dto.ActualizarTransaccionRequest;
 import com.ebp08.gestion_financiera_backend.dto.TransaccionResponse;
 import com.ebp08.gestion_financiera_backend.dto.CrearTransaccionRequest; // Importa el DTO que contiene los datos necesarios para crear una transacción.
 import com.ebp08.gestion_financiera_backend.entity.Categoria; // Importa la entidad Categoria porque una transacción debe pertenecer a una categoría.
@@ -119,6 +120,38 @@ public class TransaccionService { // Define la clase de servicio para manejar la
 
     private String safeDescripcion(String descripcion) {
         return (descripcion == null || descripcion.trim().isEmpty()) ? "" : descripcion.trim();
+    }
+
+    public Transaccion actualizarTransaccion(Long idTransaccion, ActualizarTransaccionRequest request) {
+
+        Long idUsuario = securityHelper.obtenerUsuarioAutenticado().getId();
+        securityHelper.validarPropiedad(idUsuario);
+
+        // Busca la transacción asegurando que pertenezca al usuario autenticado.
+        Transaccion transaccion = transaccionRepository.findByIdAndUsuarioId(idTransaccion, idUsuario)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Transacción no encontrada para ese usuario."));
+
+        if (request.getIdCategoria() != null) {
+            // Si llega categoría nueva, se valida propiedad/global igual que en creación.
+            Categoria categoria = obtenerCategoriaSolicitadaOPorDefecto(request.getIdCategoria(),
+                    securityHelper.obtenerUsuarioAutenticado());
+            transaccion.setCategoria(categoria);
+        }
+
+        if (request.getTipo() != null) {
+            transaccion.setTipo(request.getTipo());
+        }
+
+        if (request.getMonto() != null && !request.getMonto().trim().isEmpty()) {
+            transaccion.setMonto(MoneyParser.parse(request.getMonto()));
+        }
+
+        if (request.getDescripcion() != null) {
+            transaccion.setDescripcion(safeDescripcion(request.getDescripcion()));
+        }
+
+        return transaccionRepository.save(transaccion);
     }
 
     public void eliminarTransaccion(Long idTransaccion) {

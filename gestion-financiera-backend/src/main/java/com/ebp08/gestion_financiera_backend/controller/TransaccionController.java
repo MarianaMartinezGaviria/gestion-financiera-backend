@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.DeleteMapping; // Importa la anot
 import org.springframework.web.bind.annotation.GetMapping; // Importa la anotación para manejar peticiones HTTP GET.
 import org.springframework.web.bind.annotation.PathVariable; // Importa la anotación para capturar variables desde la URL.
 import org.springframework.web.bind.annotation.PostMapping; // Importa la anotación para manejar peticiones HTTP POST.
+import org.springframework.web.bind.annotation.PutMapping; // Importa la anotación para manejar peticiones HTTP PUT.
 import org.springframework.web.bind.annotation.RequestBody; // Importa la anotación para leer el JSON del cuerpo de la petición.
 import org.springframework.web.bind.annotation.RequestMapping; // Importa la anotación para definir la ruta base del controlador.
 import org.springframework.web.bind.annotation.RestController; // Importa la anotación que marca esta clase como controlador REST.
 
+import com.ebp08.gestion_financiera_backend.dto.ActualizarTransaccionRequest;
 import com.ebp08.gestion_financiera_backend.dto.CrearTransaccionRequest;
 import com.ebp08.gestion_financiera_backend.dto.TransaccionResponse;
 import com.ebp08.gestion_financiera_backend.entity.Transaccion; // Importa la entidad Transaccion porque este controlador recibe y devuelve transacciones.
@@ -23,7 +25,6 @@ import lombok.AllArgsConstructor; // Importa Lombok para generar automáticament
 @AllArgsConstructor // Lombok genera un constructor con todos los atributos final de la clase.
 
 
-// !!!! más adelante se debe adaptar para usar usuario autenticado en vez de recibir el id del usuario por parámetro, para mayor seguridad y usabilidad. Pero por ahora se deja así para poder probar con Postman y avanzar con la lógica de negocio.
 public class TransaccionController {
 
     private final TransaccionService transaccionService; // Inyecta el servicio de transacciones para usar su lógica desde el controlador.
@@ -50,6 +51,15 @@ public class TransaccionController {
     public ResponseEntity<List<Transaccion>> obtenerGastosRecientes() {
         List<Transaccion> gastos = transaccionService.obtenerGastosRecientes();
         return ResponseEntity.ok(gastos);
+    }
+
+    @PutMapping("/{idTransaccion}/usuario")
+    public ResponseEntity<Transaccion> actualizarTransaccion(
+            @PathVariable Long idTransaccion,
+            @RequestBody ActualizarTransaccionRequest request) {
+        // Actualiza solo los campos enviados en el body.
+        Transaccion actualizada = transaccionService.actualizarTransaccion(idTransaccion, request);
+        return ResponseEntity.ok(actualizada);
     }
 
     @DeleteMapping("/{idTransaccion}/usuario") // Toma de la URL el id de la transacción y el id del usuario.
