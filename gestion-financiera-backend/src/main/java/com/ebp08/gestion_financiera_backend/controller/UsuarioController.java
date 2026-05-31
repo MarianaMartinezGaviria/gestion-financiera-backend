@@ -5,8 +5,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ebp08.gestion_financiera_backend.dto.LoginRequest;
 import com.ebp08.gestion_financiera_backend.dto.RegistroRequest;
-import com.ebp08.gestion_financiera_backend.entity.Usuario;
+import com.ebp08.gestion_financiera_backend.dto.RecoverRequest;
+import com.ebp08.gestion_financiera_backend.dto.ResetPasswordRequest;   
+import com.ebp08.gestion_financiera_backend.dto.RegistroResponse;
+import com.ebp08.gestion_financiera_backend.service.RecoveryCodeService;
 import com.ebp08.gestion_financiera_backend.service.UsuarioService;
+
 
 import lombok.AllArgsConstructor;
 
@@ -21,10 +25,11 @@ import org.springframework.http.ResponseEntity;
 public class UsuarioController {
     
     private final UsuarioService usuarioService;
+    private final RecoveryCodeService recoveryCodeService;
 
     @PostMapping("/registro")
-    public ResponseEntity<Usuario> registrarUsuario(@RequestBody RegistroRequest registroRequest) {
-        Usuario creado = usuarioService.crearUsuario(registroRequest);
+    public ResponseEntity<RegistroResponse> registrarUsuario(@RequestBody RegistroRequest registroRequest) {
+        RegistroResponse creado = usuarioService.crearUsuario(registroRequest);
         return ResponseEntity.status(201).body(creado); // 201: Created
     }
 
@@ -40,6 +45,22 @@ public class UsuarioController {
         return ResponseEntity.ok("Sesion cerrada exitosamente.");
         // Aquí desde el Front se debería borrar el JWT
     }
+
+    @PostMapping("/recover")
+    public ResponseEntity<String> recuperarContrasena(@RequestBody RecoverRequest request) {
+    String tokenTemporal = recoveryCodeService.validarCodigo(
+        request.getCorreo(), request.getCodigo());
+    return ResponseEntity.ok(tokenTemporal); // Frontend lo guarda
+}
+
+@PostMapping("/reset-password")
+    public ResponseEntity<String> resetearContrasena(@RequestBody ResetPasswordRequest request) {
+        recoveryCodeService.resetearContrasena(
+        request.getTokenTemporal(),
+        request.getNuevaClave()
+    );
+    return ResponseEntity.ok("Contraseña actualizada exitosamente.");
+}
 
     @PutMapping("/actualizarClave")
     public ResponseEntity<String> actualizarClave(@RequestBody ActualizarClaveRequest request){

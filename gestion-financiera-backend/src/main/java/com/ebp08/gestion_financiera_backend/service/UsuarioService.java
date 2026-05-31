@@ -1,6 +1,7 @@
 package com.ebp08.gestion_financiera_backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,8 @@ import com.ebp08.gestion_financiera_backend.enums.Estado;
 import com.ebp08.gestion_financiera_backend.repository.UsuarioRepository;
 import com.ebp08.gestion_financiera_backend.security.JwtUtil;
 import com.ebp08.gestion_financiera_backend.security.SecurityHelper;
-
 import lombok.AllArgsConstructor;
+import com.ebp08.gestion_financiera_backend.dto.RegistroResponse;
 
 @Service
 @AllArgsConstructor
@@ -25,10 +26,12 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final SecurityHelper securityHelper;
+    private final RecoveryCodeService recoveryCodeService;
+   
 
-    public Usuario crearUsuario(RegistroRequest request) {
+    public RegistroResponse crearUsuario(RegistroRequest request) {
 
-        // 0. Verificamos que el correo no esté registrado por otro usuario
+        //  Verificamos que el correo no esté registrado por otro usuario
         if (!usuarioRepository.existsByCorreo(request.getCorreo())){
             // 1. Creamos un nuevo usuario con los datos del request y estado ACTIVO por defecto
             Usuario usuario = new Usuario();
@@ -37,12 +40,19 @@ public class UsuarioService {
             usuario.setFechaRegistro(LocalDateTime.now());
             usuario.setEstado(Estado.ACTIVO);
             
-            // 2. Encriptamos y guardamos la clave del usuario
+            //  Encriptamos y guardamos la clave del usuario
             String claveEncriptada = passwordEncoder.encode(request.getClave());
             usuario.setClave(claveEncriptada);
 
-            // 3. Guardamos el usuario en la base de datos
-            return usuarioRepository.save(usuario);
+            // Guardamos el usuario en la base de datos
+            Usuario usuarioGuardado = usuarioRepository.save(usuario);
+            
+            //Generamos los codigos de recuperación
+            List<String> codigosRecuperacion = recoveryCodeService.generarCodigos(usuarioGuardado);
+
+            
+            
+            return  new RegistroResponse(usuarioGuardado, codigosRecuperacion);
 
         } else {
             throw new ResponseStatusException
