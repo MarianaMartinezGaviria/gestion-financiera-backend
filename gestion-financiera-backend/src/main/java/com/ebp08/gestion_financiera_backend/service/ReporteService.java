@@ -74,6 +74,20 @@ public class ReporteService {
         }
     }
 
+    private Image obtenerLogo() {
+        try {
+            java.io.InputStream stream = getClass()
+                    .getResourceAsStream("/static/logo.png");
+            if (stream == null) return null;
+            byte[] bytes = stream.readAllBytes();
+            Image logo = Image.getInstance(bytes);
+            logo.scaleToFit(80, 80); // ajusta el tamaño según tu logo
+            return logo;
+        } catch (Exception e) {
+            return null; // si falla no rompe el PDF
+        }
+    }
+
     // ── Reporte 1: gastos por categoría ──────────────────────────────────────
 
     public List<ReporteGastosCategoriaResponse> obtenerGastosPorCategoria(int mes, int anio) {
@@ -222,13 +236,30 @@ public class ReporteService {
             Font fTotal     = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,  new BaseColor(40, 40, 40));
 
             // ── Encabezado verde oscuro para resumen general ──────────────────────
-            PdfPTable encabezado = new PdfPTable(1);
+            Image logo = obtenerLogo();
+
+            PdfPTable encabezado = new PdfPTable(logo != null ? 2 : 1);
             encabezado.setWidthPercentage(100);
             encabezado.setSpacingAfter(12f);
+            if (logo != null) {
+                encabezado.setWidths(new float[]{1.5f, 8.5f});
+            }
+
+            if (logo != null) {
+                PdfPCell celdaLogo = new PdfPCell(logo);
+                celdaLogo.setBackgroundColor(new BaseColor(30, 100, 80));
+                celdaLogo.setBorder(0);
+                celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                celdaLogo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celdaLogo.setPadding(10f);
+                encabezado.addCell(celdaLogo);
+            }
+
             PdfPCell celdaTitulo = new PdfPCell();
             celdaTitulo.setBackgroundColor(new BaseColor(30, 100, 80));
             celdaTitulo.setPadding(16f);
             celdaTitulo.setBorder(0);
+            celdaTitulo.setVerticalAlignment(Element.ALIGN_MIDDLE);
             Paragraph pTitulo = new Paragraph("Reporte Financiero Mensual\n", fTitulo);
             pTitulo.add(new Chunk(
                     "Usuario: " + securityHelper.obtenerUsuarioAutenticado().getNombre()
@@ -236,6 +267,7 @@ public class ReporteService {
                     new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL, BaseColor.WHITE)));
             celdaTitulo.addElement(pTitulo);
             encabezado.addCell(celdaTitulo);
+
             documento.add(encabezado);
 
             // ── Tarjetas de resumen ───────────────────────────────────────────────
@@ -568,15 +600,30 @@ public class ReporteService {
             Font fTotal     = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,  new BaseColor(40, 40, 40));
 
             // ── Encabezado con fondo azul ─────────────────────────────────────────
-            PdfPTable encabezado = new PdfPTable(1);
+            Image logo = obtenerLogo();
+
+            PdfPTable encabezado = new PdfPTable(logo != null ? 2 : 1);
             encabezado.setWidthPercentage(100);
             encabezado.setSpacingAfter(12f);
+            if (logo != null) {
+                encabezado.setWidths(new float[]{1.5f, 8.5f});
+            }
+
+            if (logo != null) {
+                PdfPCell celdaLogo = new PdfPCell(logo);
+                celdaLogo.setBackgroundColor(new BaseColor(30, 80, 160));
+                celdaLogo.setBorder(0);
+                celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                celdaLogo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celdaLogo.setPadding(10f);
+                encabezado.addCell(celdaLogo);
+            }
 
             PdfPCell celdaTitulo = new PdfPCell();
             celdaTitulo.setBackgroundColor(new BaseColor(30, 80, 160));
             celdaTitulo.setPadding(16f);
             celdaTitulo.setBorder(0);
-
+            celdaTitulo.setVerticalAlignment(Element.ALIGN_MIDDLE);
             Paragraph pTitulo = new Paragraph(
                     "Comparativa Mensual de Ingresos vs Gastos\n", fTitulo);
             pTitulo.add(new Chunk("Usuario: " + comparativa.getNombreUsuario()
@@ -755,13 +802,30 @@ public class ReporteService {
             Font fTablaHead = new Font(Font.FontFamily.HELVETICA, 9,  Font.BOLD,  BaseColor.WHITE);
             Font fTotal     = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,  new BaseColor(40, 40, 40));
 
-            PdfPTable encabezado = new PdfPTable(1);
+            Image logo = obtenerLogo();
+
+            PdfPTable encabezado = new PdfPTable(logo != null ? 2 : 1);
             encabezado.setWidthPercentage(100);
             encabezado.setSpacingAfter(12f);
+            if (logo != null) {
+                encabezado.setWidths(new float[]{1.5f, 8.5f});
+            }
+
+            if (logo != null) {
+                PdfPCell celdaLogo = new PdfPCell(logo);
+                celdaLogo.setBackgroundColor(new BaseColor(180, 40, 40));
+                celdaLogo.setBorder(0);
+                celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                celdaLogo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celdaLogo.setPadding(10f);
+                encabezado.addCell(celdaLogo);
+            }
+
             PdfPCell celdaTitulo = new PdfPCell();
             celdaTitulo.setBackgroundColor(new BaseColor(180, 40, 40));
             celdaTitulo.setPadding(16f);
             celdaTitulo.setBorder(0);
+            celdaTitulo.setVerticalAlignment(Element.ALIGN_MIDDLE);
             Paragraph pTitulo = new Paragraph("Reporte de Gastos por Categoría\n", fTitulo);
             pTitulo.add(new Chunk("Usuario: "
                     + securityHelper.obtenerUsuarioAutenticado().getNombre()
@@ -920,13 +984,30 @@ public class ReporteService {
             Font fTablaHead = new Font(Font.FontFamily.HELVETICA, 9,  Font.BOLD,  BaseColor.WHITE);
             Font fTotal     = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD,  new BaseColor(40, 40, 40));
 
-            PdfPTable encabezado = new PdfPTable(1);
+            Image logo = obtenerLogo();
+
+            PdfPTable encabezado = new PdfPTable(logo != null ? 2 : 1);
             encabezado.setWidthPercentage(100);
             encabezado.setSpacingAfter(12f);
+            if (logo != null) {
+                encabezado.setWidths(new float[]{1.5f, 8.5f});
+            }
+
+            if (logo != null) {
+                PdfPCell celdaLogo = new PdfPCell(logo);
+                celdaLogo.setBackgroundColor(new BaseColor(30, 100, 180));
+                celdaLogo.setBorder(0);
+                celdaLogo.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                celdaLogo.setHorizontalAlignment(Element.ALIGN_CENTER);
+                celdaLogo.setPadding(10f);
+                encabezado.addCell(celdaLogo);
+            }
+
             PdfPCell celdaTitulo = new PdfPCell();
             celdaTitulo.setBackgroundColor(new BaseColor(30, 100, 180));
             celdaTitulo.setPadding(16f);
             celdaTitulo.setBorder(0);
+            celdaTitulo.setVerticalAlignment(Element.ALIGN_MIDDLE);
             Paragraph pTitulo = new Paragraph("Reporte de Ingresos por Categoría\n", fTitulo);
             pTitulo.add(new Chunk("Usuario: "
                     + securityHelper.obtenerUsuarioAutenticado().getNombre()
