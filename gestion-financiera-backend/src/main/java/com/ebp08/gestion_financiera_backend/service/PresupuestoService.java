@@ -47,8 +47,14 @@ public class PresupuestoService {
         presupuesto.setCategoria(null); // Un presupuesto global no tiene categoría
     
         // Busca si ya existe un presupuesto global para este usuario en el mes actual
+        LocalDateTime inicioMes = inicioMesActual();
+        LocalDateTime finMes = finMesActual();
         Optional<Presupuesto> existente = presupuestoRepository
-            .findByUsuarioIdAndMesActual(presupuesto.getUsuario().getId());
+            .findByUsuarioIdAndFechaLimiteBetweenAndCategoriaIsNull(
+                presupuesto.getUsuario().getId(),
+                inicioMes,
+                finMes
+            );
 
         if (existente.isPresent()) {
             // Si existe, actualiza el monto del mismo
@@ -95,7 +101,12 @@ public class PresupuestoService {
 
         // Buscar si ya existe un presupuesto para esta categoría en el mes actual
         Optional<Presupuesto> existente = presupuestoRepository
-            .findByUsuarioIdAndCategoriaIdAndMesActual(usuario.getId(), categoria.getId());
+            .findByUsuarioIdAndCategoriaIdAndFechaLimiteBetween(
+                usuario.getId(),
+                categoria.getId(),
+                inicioMesActual(),
+                finMesActual()
+            );
 
         if (existente.isPresent()) {
             // Si existe, actualiza el monto y la fecha límite
@@ -142,7 +153,11 @@ public class PresupuestoService {
         Long idUsuario = securityHelper.obtenerUsuarioAutenticado().getId();
         securityHelper.validarPropiedad(idUsuario);
 
-        return presupuestoRepository.findByUsuarioIdAndMesActual(idUsuario);
+        return presupuestoRepository.findByUsuarioIdAndFechaLimiteBetweenAndCategoriaIsNull(
+            idUsuario,
+            inicioMesActual(),
+            finMesActual()
+        );
     }
 
     // Trae los presupuestos por categoria del usuario autenticado para uso interno entre servicios.
@@ -150,11 +165,20 @@ public class PresupuestoService {
         Long idUsuario = securityHelper.obtenerUsuarioAutenticado().getId();
         
         securityHelper.validarPropiedad(idUsuario);
+        LocalDateTime inicioMes = inicioMesActual();
+        LocalDateTime finMes = finMesActual();
 
         List<Categoria> categorias = categoriaRepository.findByUsuarioIsNullOrUsuarioId(idUsuario);
 
         return categorias.stream()
-            .map(categoria -> presupuestoRepository.findByUsuarioIdAndCategoriaIdAndMesActual(idUsuario, categoria.getId()).orElse(null))
+            .map(categoria -> presupuestoRepository
+                .findByUsuarioIdAndCategoriaIdAndFechaLimiteBetween(
+                    idUsuario,
+                    categoria.getId(),
+                    inicioMes,
+                    finMes
+                )
+                .orElse(null))
             .filter(java.util.Objects::nonNull)
             .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
     }
@@ -238,6 +262,25 @@ public class PresupuestoService {
 
         return gastado.multiply(BigDecimal.valueOf(100))
             .divide(montoLimite, 2, RoundingMode.HALF_UP);
+    }
+
+    private LocalDateTime inicioMesActual() {
+        return LocalDateTime.now()
+            .withDayOfMonth(1)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0);
+    }
+
+    private LocalDateTime finMesActual() {
+        LocalDateTime ahora = LocalDateTime.now();
+        return ahora
+            .withDayOfMonth(ahora.toLocalDate().lengthOfMonth())
+            .withHour(23)
+            .withMinute(59)
+            .withSecond(59)
+            .withNano(999_999_999);
     }
 
     public Optional<Presupuesto> obtenerPresupuestoPorId(Long idPresupuesto) {
